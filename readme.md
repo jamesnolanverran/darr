@@ -29,8 +29,8 @@ darr_free(arr); // Free memory when done
 ### Macros & Functions
 
 - `darr_push(arr, value)` – Append an element, resizing as needed.
-- `darr_pop(arr)` – Remove and return the last element.
-- `darr_peek(arr)` – Return the last element without removing it.
+- `darr_pop(arr)` – Remove and return the last element. User should check for NULL and empty array.
+- `darr_peek(arr)` – Return the last element without removing it. User should check for NULL and empty array.
 - `darr_pop_safe(arr, default)` – Safe pop with a default return value if empty.
 - `darr_peek_safe(arr, default)` – Safe peek with a default return value if empty.
 - `darr_len(arr)` – Get the number of elements.
@@ -42,16 +42,19 @@ darr_free(arr); // Free memory when done
 
 ## Implementation Details
 
-Dynamic arrays use a small header (`DarrHdr`) stored before the array data. The user provides an allocator function for memory management, ensuring flexibility.
+Dynamic arrays use a small header (`DarrHdr`) stored before the array data. The user may provides an allocator function.
 
 ```c
-typedef void *(*AllocatorFn)(void *hdr, size_t new_total_size);
-
-typedef struct DarrHdr {
-    AllocatorFn alloc;
-    unsigned int len, cap;
-    _Alignas(DARR_ALIGNMENT) char data[];
+typedef struct DarrHdr { 
+    AllocatorFn alloc; // allocator must provide a single contiguous block of memory
+    unsigned int len;
+    unsigned int cap;
+    _Alignas(DARR_ALIGNMENT) char data[]; 
 } DarrHdr;
+
+static inline DarrHdr *darr__hdr(void *arr) { 
+    return (DarrHdr*)( (char*)(arr) - offsetof(DarrHdr, data)); 
+}
 ```
 
 ## Credits
