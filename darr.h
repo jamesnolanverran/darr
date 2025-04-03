@@ -19,6 +19,16 @@ extern "C" {
 
 #define DARR_INITIAL_CAPACITY 16
 #define DARR_GROWTH_MULTIPLIER 2.0f
+#if defined(__cplusplus)
+    #define DARR_TYPEOF(d) (decltype((d) + 0))
+#elif defined(__clang__) && defined(_MSC_VER)
+    // clang-cl behaves like MSVC, no typeof
+    #define DARR_TYPEOF(d)
+#elif defined(__clang__) || defined(__GNUC__)  
+    #define DARR_TYPEOF(d) (typeof(d))
+#else
+    #define DARR_TYPEOF(d)
+#endif
 
 typedef void *(*AllocatorFn)(void *hdr, size_t new_total_size);
 
@@ -41,7 +51,7 @@ static inline void darr_free(void *a) { if (a) darr__hdr(a)->alloc(darr__hdr(a),
 void *darr__grow(void *arr, size_t elem_size);
 void *darr__init(void *arr, size_t initial_capacity, size_t elem_size, AllocatorFn alloc);
 void darr__free(void *a);
-#define darr__fit(a, n) ((n) <= darr_cap(a) ? 0 : ((a) = darr__grow((a), sizeof(*(a)))))
+#define darr__fit(a, n) ((n) <= darr_cap(a) ? 0 : ((a) = DARR_TYPEOF(a) darr__grow((a), sizeof(*(a)))))
 
 #define darr_end(a) ((a) + darr_len(a))
 

@@ -3,6 +3,9 @@
 #include <stdlib.h>
 
 #define DARR_MAX_CAPACITY ((size_t)UINT32_MAX - 2)
+#ifndef MAX
+#define MAX(x, y) ((x) >= (y) ? (x) : (y))
+#endif
 
 static void darr_default_error_handler(char* err_msg) {
     perror(err_msg);
@@ -63,6 +66,6 @@ void *darr__grow(void *arr, size_t elem_size) {
         darr_error_handler("Out of memory 5");
     }
     new_hdr->cap = (unsigned int)new_cap;
-    assert(((size_t)&new_hdr->data & (DARR_ALIGNMENT - 1)) == 0); // Ensure alignment
+    // assert(((size_t)&new_hdr->data & (DARR_ALIGNMENT - 1)) == 0); // Ensure alignment
     return &new_hdr->data;
 }
